@@ -63,6 +63,7 @@
       <f:option value="ByFullName" selected="${it.currentOrder()=='ByFullName'}">${%Full name}</f:option>
       <f:option value="ByStatus" selected="${it.currentOrder()=='ByStatus'}">${%Status}</f:option>
       <f:option value="ByLastBuildTime" selected="${it.currentOrder()=='ByLastBuildTime'}">${%Last build time}</f:option>
+      <f:option value="ByPipeline" selected="${it.currentOrder()=='ByPipeline'}">${%Pipeline}</f:option>
     </select>
   </f:entry>
 
