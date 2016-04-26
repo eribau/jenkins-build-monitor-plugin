@@ -21,7 +21,7 @@ public class ByPipeline implements Comparator<AbstractProject<?, ?>>{
                 return 0;
             }
         } else {
-            return -1;
+            return 1;
         }
     }
      private String getPipelineRoot(AbstractProject<?, ?> project) {
