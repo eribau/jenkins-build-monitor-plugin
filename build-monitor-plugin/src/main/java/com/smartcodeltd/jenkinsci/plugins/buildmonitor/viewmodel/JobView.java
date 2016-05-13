@@ -29,9 +29,13 @@ public class JobView {
     private final BuildAugmentor augmentor;
     private final RelativeLocation relative;
     private final Config config;
+    private String name = null;
 
     public static JobView of(Job<?, ?> job, Config config, BuildAugmentor augmentor) {
         return new JobView(job, config, augmentor, RelativeLocation.of(job), new Date());
+    }
+    public static JobView of(Job<?, ?> job, Config config, BuildAugmentor augmentor, String name) {
+        return new JobView(job, config, augmentor, RelativeLocation.of(job), new Date(), name);
     }
 
     public JobView(Job<?, ?> job, Config config, BuildAugmentor augmentor, RelativeLocation relative, Date systemTime) {
@@ -42,9 +46,21 @@ public class JobView {
         this.systemTime = systemTime;
     }
 
+    public JobView(Job<?, ?> job, Config config, BuildAugmentor augmentor, RelativeLocation relative, Date systemTime, String name) {
+        this.job        = job;
+        this.config     = config;
+        this.augmentor  = augmentor;
+        this.relative   = relative;
+        this.systemTime = systemTime;
+        this.name = name;
+    }
+
     @JsonProperty
     public String name() {
-        return relative.name();
+        if (name != null)
+            return name;
+        else
+            return relative.name();
     }
 
     @JsonProperty

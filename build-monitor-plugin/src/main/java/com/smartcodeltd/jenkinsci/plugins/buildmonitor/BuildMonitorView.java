@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static hudson.Util.filter;
 
@@ -49,10 +50,14 @@ import static hudson.Util.filter;
  * @author Jan Molak
  */
 public class BuildMonitorView extends ListView {
+
+    private static final Logger log= Logger.getLogger( BuildMonitorView.class.getName() );
     @Extension
     public static final BuildMonitorDescriptor descriptor = new BuildMonitorDescriptor();
 
     private String title;
+    private String prefix ="", suffix="";
+    private String commonprefix = "false";
 
     /**
      * @param name  Name of the view to be displayed on the Views tab
@@ -97,8 +102,10 @@ public class BuildMonitorView extends ListView {
         super.submit(req);
 
         String requestedOrdering = req.getParameter("order");
-
+        prefix = req.getParameter("includePrefix");
+        suffix = req.getParameter("includeSuffix");
         title = req.getParameter("title");
+        commonprefix = req.getParameter("commonprefix");
 
         try {
             currentConfig().setOrder(orderIn(requestedOrdering));
@@ -132,11 +139,110 @@ public class BuildMonitorView extends ListView {
 
         Collections.sort(projects, currentConfig().getOrder());
 
+        String currname,newname,removeofname = "";
+
+
+
+
+        if (commonprefix != null){
+
+            removeofname = applycommonprefix(projects);
+
+            for (Job project : projects) {
+                currname = project.getName();
+                newname = commonprefix(currname, removeofname);
+               // log.info(currname + " new: " + newname);
+                jobs.add(JobView.of(project, currentConfig(), withAugmentationsIfTheyArePresent(), newname));
+
+            }
+
+        }else{
+
         for (Job project : projects) {
-            jobs.add(JobView.of(project, currentConfig(), withAugmentationsIfTheyArePresent()));
+            //String currname,newname;
+            currname = project.getName();
+
+
+            if (prefix.length() > 2 && suffix.length() > 2){
+                newname = prefixit(currname);
+                newname = suffixit(newname);
+                log.info(currname + " new: " + newname);
+                jobs.add(JobView.of(project, currentConfig(), withAugmentationsIfTheyArePresent(), newname));
+
+            }else if (prefix.length() > 2 && suffix.length() < 2){
+                newname = prefixit(currname);
+                log.info(currname + " new: " + newname);
+                jobs.add(JobView.of(project, currentConfig(), withAugmentationsIfTheyArePresent(), newname));
+
+            }else if (prefix.length() < 2 && suffix.length() > 2){
+                newname = suffixit(currname);
+                log.info(currname + " new: " + newname);
+                jobs.add(JobView.of(project, currentConfig(), withAugmentationsIfTheyArePresent(), newname));
+
+            }else{
+                jobs.add(JobView.of(project, currentConfig(), withAugmentationsIfTheyArePresent()));
+            }
+
+        }
+         }
+        return jobs;
+    }
+
+    private String applycommonprefix( List<Job<?, ?>> projects ){
+        boolean continues = true;
+        ArrayList<String> oldnames = new ArrayList<String>();
+        String currname, removeofname ="";
+        for (Job project : projects){
+            currname = project.getName();
+            oldnames.add(currname);
+        }
+        String[] temp = oldnames.get(0).split("");
+        for (int i = 0; i < temp.length-1; i++){
+            String letter = temp[i];
+            if (continues){
+                for (int u = 0; u < oldnames.size(); u++){
+                    String[] cur = oldnames.get(u).split("");
+                    if (cur[i].equals(letter)){
+                        continues = true;
+                    }else{
+                        continues = false;
+                        break;
+                    }
+                }
+                if (continues){
+                    removeofname+= letter;
+                    //log.info("remove: " + removeofname + " new letter: " + letter);
+                }
+            }
+        }
+        log.info("common prefix found: "+removeofname);
+        return removeofname;
+    }
+
+    private String prefixit(String source){
+        String newname = source.replaceFirst("^("+prefix+")","");
+        return newname;
+    }
+    private String commonprefix(String source, String prefixx){
+        String newname = source.replaceFirst("^("+prefixx+")","");
+        return newname;
+    }
+    private String suffixit(String source){
+        String namerev = reverseit(source);
+        String suffixrev = reverseit(suffix);
+        namerev = namerev.replaceFirst("^("+suffixrev+")","");
+        String newname = reverseit(namerev);
+        return newname;
+    }
+    private static String reverseit(String source) {
+        int i, len = source.length();
+        StringBuilder dest = new StringBuilder(len);
+
+        for (i = (len - 1); i >= 0; i--){
+            dest.append(source.charAt(i));
         }
 
-        return jobs;
+        return dest.toString();
     }
 
     private BuildAugmentor withAugmentationsIfTheyArePresent() {

@@ -40,6 +40,26 @@
     </f:entry>
   </f:optionalBlock>
 
+  <!--inserted by gustaf for prefix, suffix and regex-->
+
+  <f:entry title="${%Strip common prefix}" field="commonprefix">
+      <f:checkbox name="commonprefix"/>
+    </f:entry>
+
+  <f:optionalBlock name="useincludeprefix" title="${%Write your own prefix to remove the beginning of job names}"
+                     checked="${it.includePrefix != null}" help="/help/view-config/includeprefix.html">
+      <f:entry title="${%Strip common prefix}">
+        <f:textbox name="includePrefix" field="includePrefix" />
+      </f:entry>
+    </f:optionalBlock>
+
+    <f:optionalBlock name="useincludesuffix" title="${%Write your own suffix to remove the end of job names}"
+                         checked="${it.includeSuffix != null}" help="/help/view-config/includesuffix.html">
+          <f:entry title="${%Strip common suffix}">
+            <f:textbox name="includeSuffix" field="includeSuffix" />
+          </f:entry>
+        </f:optionalBlock>
+
   <j:if test="${it.hasJobFilterExtensions()}">
     <f:block>
       <f:repeatableHeteroProperty field="jobFilters" hasHeader="true" addCaption="${%Add Job Filter}" />

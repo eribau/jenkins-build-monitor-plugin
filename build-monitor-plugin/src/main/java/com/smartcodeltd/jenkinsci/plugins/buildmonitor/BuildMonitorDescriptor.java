@@ -28,6 +28,7 @@ public final class BuildMonitorDescriptor extends ViewDescriptor {
         if (v != null) {
             try {
                 Pattern.compile(v);
+                //System.out.println(v);
             } catch (PatternSyntaxException pse) {
                 return FormValidation.error(pse.getMessage());
             }
